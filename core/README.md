@@ -76,13 +76,13 @@ By default, the following settings are generated:
 ```
 # mailman.cfg
 [mta]
-incoming: mailman.mta.exim4.LMTP
+incoming: mailman.mta.postfix.LMTP
 outgoing: mailman.mta.deliver.deliver
-lmtp_host: $MM_HOSTNAME
+lmtp_host: $SMTP_HOST
 lmtp_port: 8024
 smtp_host: $SMTP_HOST
 smtp_port: $SMTP_PORT
-configuration: python:mailman.config.exim4
+configuration: /etc/postfix-mailman.cfg
 
 [runner.retry]
 sleep_time: 10s

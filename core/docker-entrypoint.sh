@@ -91,7 +91,6 @@ else
 	setup_database
 fi
 
-
 if [[ "$DATABASE_TYPE" = 'postgres' ]]
 then
 	wait_for_postgres
@@ -103,13 +102,13 @@ fi
 # Generate a basic mailman.cfg.
 cat >> /etc/mailman.cfg <<EOF
 [mta]
-incoming: mailman.mta.exim4.LMTP
+incoming: mailman.mta.postfix.LMTP
 outgoing: mailman.mta.deliver.deliver
-lmtp_host: $MM_HOSTNAME
+lmtp_host: $SMTP_HOST
 lmtp_port: 8024
 smtp_host: $SMTP_HOST
 smtp_port: $SMTP_PORT
-configuration: python:mailman.config.exim4
+configuration: /etc/postfix-mailman.cfg
 
 [runner.retry]
 sleep_time: 10s
@@ -121,15 +120,6 @@ hostname: $MM_HOSTNAME
 class: mailman_hyperkitty.Archiver
 enable: yes
 configuration: /etc/mailman-hyperkitty.cfg
-EOF
-
-# Generate a basic configuration to use postfix.
-cat > /etc/postfix-mailman.cfg <<EOF
-[postfix]
-transport_file_type: regex
-# While in regex mode, postmap_command is never used, a placeholder
-# is added here so that it doesn't break anything.
-postmap_command: true
 EOF
 
 
@@ -158,10 +148,16 @@ base_url: $HYPERKITTY_URL
 api_key: $HYPERKITTY_API_KEY
 EOF
 
-# Generate the LMTP files for postfix if needed.
-mailman aliases
 
 # Now chown the places where mailman wants to write stuff.
 chown -R mailman /opt/mailman
 
 exec su-exec mailman "$@"
+
+# Generate the LMTP files for postfix if needed.
+mailman aliases
+
+# Append required postfix config to postfix default config
+cat main.cf.mod >> /etc/postfix/main.cf 
+
+postfix start
