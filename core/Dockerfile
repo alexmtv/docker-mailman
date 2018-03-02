@@ -4,11 +4,12 @@ MAINTAINER Abhilash Raj
 
 #Add startup script to container
 COPY docker-entrypoint.sh /usr/local/bin/
+COPY assets/postfix/main.cf.mod /usr/local/bin/
 
 #Install all required packages, add user for executing mailman and set execution rights for startup script
 RUN apk update \
     && apk add --virtual build-deps gcc python3-dev musl-dev postgresql-dev \
-    && apk add bash su-exec postgresql-client mysql-client curl \
+    && apk add bash su-exec postgresql-client mysql-client curl postfix nano \
     && pip install psycopg2 \
                    mailman==3.1.1 \
                    mailman-hyperkitty==1.1.0 \
@@ -19,8 +20,8 @@ RUN apk update \
 # Change the working directory.
 WORKDIR /opt/mailman
 
-#Expose the ports for the api (8001) and lmtp (8024)
-EXPOSE 8001 8024
+#Expose the ports for the api (8001) and lmtp (8024), smtp (25)
+EXPOSE 8001 8024 25
 
 ENV MAILMAN_CONFIG_FILE /etc/mailman.cfg
 

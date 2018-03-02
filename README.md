@@ -2,8 +2,8 @@
 permalink: /
 ---
 
-GNU Mailman 3 Deployment with Docker
-====================================
+GNU Mailman 3 Deployment with Docker and Postfix
+================================================
 
 This repository hosts code for two docker images `maxking/mailman-core` and
 `maxking/mailman-web` both of which are meant to deploy [GNU Mailman 3][1] in
@@ -308,40 +308,9 @@ this. However, these are very easy to understand if you know how docker works.
 Setting up your MTA
 ===================
 
-The provided docker containers do not have an MTA in-built. You can either run
-your own MTA inside a container and have them relay emails to the mailman-core
+The provided docker containers have a postfix MTA in-built. 
+You can either run your own MTA inside a container and have them relay emails to the mailman-core
 container or just install an MTA on the host and have them relay emails.
-
-To use [Exim4][8], it should be setup to relay emails from `172.19.199.3` and
-`172.19.199.2`. The mailman specific configuration is provided in the repository
-at `core/assets/exim`. There are three files
-
-- [25_mm_macros](core/assets/exim/25_mm3_macros) to be placed at
-  `/etc/exim4/conf.d/main/25_mm3_macros` in a typical Debian install of
-  exim4. Please change MY_DOMAIN_NAME to the domain name that will be used to
-  serve mailman. Multi-domain setups will be added later.
-
-- [455_mm3_router](core/assets/exim/455_mm3_router) to be placed at
-  `/etc/exim4/conf.d/main/455_mm3_router` in a typical Debian install of exim4.
-
-- [55_mm3_transport](core/assets/exim/55_mm3_transport) to be placed at
-  `/etc/exim4/conf.d/main/55_mm3_transport` in a typical Debian install of exim4.
-
-
-Also, the default configuration inside the mailman-core image has the MTA set to
-Exim, but just for reference, it looks like this:
-```
-# mailman.cfg
-[mta]
-incoming: mailman.mta.exim4.LMTP
-outgoing: mailman.mta.deliver.deliver
-lmtp_host: $MM_HOSTNAME
-lmtp_port: 8024
-smtp_host: $SMTP_HOST
-smtp_port: $SMTP_PORT
-configuration: python:mailman.config.exim4
-```
-
 
 To use [Postfix][12], it should be set up to relay emails from
 `172.19.199.2` and `172.19.199.3`. The mailman specific configuration is
